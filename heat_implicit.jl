@@ -11,7 +11,7 @@ a,b, n = 0, 1, 10               # zmin, zmax, number of cells
 n̂_min, n̂_max = -1, 1            # Outward facing unit vectors
 α = 100;                        # thermal diffusivity, larger means more stiff
 β, γ = 10000, π;                # source term coefficients
-Δt = 100;                       # timestep
+Δt = 1000;                      # timestep
 N_t = 10;                       # number of timesteps
 FT = Float64;                   # float type
 Δz = FT(b-a)/FT(n)
@@ -183,4 +183,4 @@ p2 = Plots.plot!(p2, title="T ∈ cell faces")
 p4 = Plots.plot(zf, abs.(T .- T_analytic.(zf)), label="error", markershape=:circle, markersize=6)
 p4 = Plots.plot!(p4, title="T ∈ cell faces")
 
-Plots.plot(p3, p4, p1, p2)
+Plots.plot(p1, p3, p2, p4)
