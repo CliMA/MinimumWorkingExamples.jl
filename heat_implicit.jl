@@ -149,13 +149,19 @@ T = zeros(FT, n+1);
 
 # Note that size(A) = (n,n) due to 1 Dirichlet and 1 Neumann.
 ∇² = Tridiagonal(
-    ones(FT, n-1) .* ∇²_op[1],
-    ones(FT, n)   .* ∇²_op[2],
-    ones(FT, n-1) .* ∇²_op[3]
+    ones(FT, n) .* ∇²_op[1],
+    ones(FT, n+1)   .* ∇²_op[2],
+    ones(FT, n) .* ∇²_op[3]
 );
+
 # Modify boundary stencil to account for BCs
 ∇².d[1] = -2/Δz²
 ∇².du[1] = +2/Δz²
+
+# Modify boundary stencil to account for BCs
+∇².du[n] = 0  # modified stencil
+∇².d[n+1] = 0 # to ensure `∂_t T = 0` at `z=zmax`
+∇².dl[n] = 0  # to ensure `∂_t T = 0` at `z=zmax`
 
 A = LinearAlgebra.I - Δt.* α .* ∇²
 
@@ -169,11 +175,11 @@ T .= T_init;
 T[n+1] = T_top
 @inbounds for i_t in 1:N_t
     interior = 1:n
-    b_rhs = T[interior] .+ Δt .* (S.(zf[interior]) .+ AT_b[interior])
+    b_rhs = T .+ Δt .* (S.(zf) .+ AT_b)
     T_new = A \ b_rhs
-    ΔT_norm = sum(T[interior] .- T_new)/length(T)
+    ΔT_norm = sum(T .- T_new)/length(T)
     @show ΔT_norm # watch ΔT norm
-    T[interior] .= T_new
+    T .= T_new
 end
 
 p2 = Plots.plot(zf, T_analytic.(zf), label="analytic", markershape=:circle, markersize=6)
